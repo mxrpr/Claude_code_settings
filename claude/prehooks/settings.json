@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "input=$(cat); agent_type=$(echo \"$input\" | jq -r '.agent_type // empty'); cmd=$(echo \"$input\" | jq -r '.tool_input.command // empty'); if [ -z \"$agent_type\" ]; then echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"Direct Bash from the main thread is blocked globally. Delegate: os-agent (general shell/OS), git-runner (git), test-runner (running tests).\"}}'; elif [ \"$agent_type\" = \"os-agent\" ] && echo \"$cmd\" | grep -qE '(^|[;&|])[[:space:]]*git[[:space:]]'; then echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"git commands should go through git-runner, not os-agent.\"}}'; elif [ \"$agent_type\" = \"os-agent\" ] && echo \"$cmd\" | grep -qE 'dotnet test|npm (run )?test|yarn test|pnpm test|cargo test|pytest|jest|vitest'; then echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"Test commands should go through test-runner, not os-agent.\"}}'; else echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"allow\"}}'; fi"
+          }
+        ]
+      }
+    ]
+  }
+}
