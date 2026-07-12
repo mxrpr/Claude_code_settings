@@ -20,4 +20,10 @@ The code-simplifier skill is focused on one thing: take recently modified code a
 The rule it enforces that I appreciate most: never change behaviour, only how behaviour is expressed. It won’t refactor your logic or suggest architecture changes — it cleans up the code you just wrote and moves on. That constraint is what makes it trustworthy.
 
 
+## Karpathy-Inspired Claude Code Guidelines
+https://github.com/multica-ai/andrej-karpathy-skills/tree/main
+
+### Installation
+/plugin marketplace add forrestchang/andrej-karpathy-skills
+
 
