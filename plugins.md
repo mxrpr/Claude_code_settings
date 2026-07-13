@@ -20,6 +20,15 @@ The code-simplifier skill is focused on one thing: take recently modified code a
 The rule it enforces that I appreciate most: never change behaviour, only how behaviour is expressed. It won’t refactor your logic or suggest architecture changes — it cleans up the code you just wrote and moves on. That constraint is what makes it trustworthy.
 
 
+## dev-pipeline
+Source: this repo — `dev-pipeline-plugin/`
+
+`/plugin marketplace add mxrpr/Claude_code_settings`
+`/plugin install dev-pipeline@dev-pipeline-marketplace`
+
+Adds the `/dev-pipeline` command plus six subagents (planning, implementation, code-review, test-planner, test-writer, test-executor) that run a plan → implement → review → test loop, one part of plan.md at a time.
+
+
 ## Karpathy-Inspired Claude Code Guidelines
 https://github.com/multica-ai/andrej-karpathy-skills/tree/main
 
