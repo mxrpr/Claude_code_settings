@@ -1,0 +1,11 @@
+{
+  "name": "dev-pipeline-marketplace",
+  "owner": { "name": "Ferenc Tollas" },
+  "plugins": [
+    {
+      "name": "dev-pipeline",
+      "source": "./",
+      "description": "Plan -> implement -> review -> test pipeline, run part by part with dedicated subagents."
+    }
+  ]
+}
