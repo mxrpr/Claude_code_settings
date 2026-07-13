@@ -34,6 +34,13 @@ Located in `claude/agents/` (all run on Haiku unless noted):
 - **test-runner** — runs existing test suites and reports pass/fail only, never fixes.
 
 ## Commands
+
+### Usage
+```
+/dev-pipeline <plan or feature description>
+```
+Run it with a plan or feature description as argument. It plans first and stops for your review — nothing gets implemented until you tell it to continue. After that it works through the plan.md checklist one part at a time (implement → review → test), pausing between parts for you to say go-ahead.
+
 /dev-pipeline: starts the development process with agents. The process:
 
 1. Use the planning subagent to break the user-provided plan into small, ordered parts (each a self-contained unit of work), written to the plan the user provided as a checklist.
