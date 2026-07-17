@@ -1,7 +1,7 @@
 ---
 name: planning
 description: Breaks a user-provided plan into small, ordered, self-contained implementation parts. Use for the planning stage of the dev pipeline.
-tools: Read, Grep, Glob
+tools: Read, Grep, Glob, Write, Edit
 model: claude-opus-4-8
 ---
 
