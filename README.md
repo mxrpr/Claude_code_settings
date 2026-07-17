@@ -15,7 +15,7 @@ See [plugins.md](plugins.md) for install commands and details.
 - **[caveman](https://github.com/juliusbrussee/caveman)** — ultra-compressed communication mode plus `cavecrew-*` subagents (investigator/builder/reviewer) for token-efficient delegation.
 - **[code security review](https://github.com/anthropics/claude-code-security-review)** — `comprehensive-review@claude-code-workflows` (architect-review, code-reviewer, security-auditor agents).
 - **code-simplifier** — Anthropic official plugin; cleans up recently modified code for clarity without changing behavior.
-- **dev-pipeline** (this repo, `dev-pipeline-plugin/`) — plan → implement → review → test loop with dedicated subagents. Install:
+- **[dev-pipeline](plugins.md#dev-pipeline)** (this repo, `dev-pipeline-plugin/`) — plan → implement → review → test loop with dedicated subagents. Install:
   ```
   /plugin marketplace add mxrpr/Claude_code_settings
   /plugin install dev-pipeline@dev-pipeline-marketplace
