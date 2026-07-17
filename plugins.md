@@ -26,7 +26,37 @@ Source: this repo — `dev-pipeline-plugin/`
 `/plugin marketplace add mxrpr/Claude_code_settings`
 `/plugin install dev-pipeline@dev-pipeline-marketplace`
 
-Adds the `/dev-pipeline` command plus six subagents (planning, implementation, code-review, test-planner, test-writer, test-executor) that run a plan → implement → review → test loop, one part of plan.md at a time.
+Runs a plan → implement → review → test loop, one part of `plan.md` at a time, instead of one big agent doing everything in a single unstructured pass. Each stage is a dedicated subagent so each one stays narrowly scoped and the context of one stage doesn't pollute another.
+
+Usage: `/dev-pipeline <plan or feature description>`
+
+Flow:
+1. **planning** subagent breaks the request into small, ordered, self-contained parts, written into `plan.md` as a checklist. It then stops — nothing implements until you say go. Review and refine the plan here.
+2. For each part, in order:
+   - **implementation** subagent implements just that part.
+   - **code-review** subagent reviews the diff. Problems go back to implementation, up to 2 retries, before moving on.
+   - **test-planner** subagent scopes a test plan to that part, **test-writer** writes the tests, **test-executor** runs them and reports pass/fail.
+   - Failing tests go back to implementation, then re-review.
+   - `plan.md`'s checklist is the source of truth for where the pipeline stopped — it survives session resets even if agent memory doesn't.
+   - Pauses after each completed part for your go-ahead to continue.
+3. Once every part is done, reports a summary of what was implemented and tested.
+
+If a part fails after retries, the pipeline stops and reports status rather than pushing on to the next part.
+
+Example:
+```
+/dev-pipeline Add rate limiting to the public API
+```
+Planning subagent writes `plan.md`:
+```markdown
+# Plan: Add rate limiting to the public API
+
+- [ ] Part 1: Add token-bucket limiter middleware (per-IP)
+- [ ] Part 2: Wire middleware into the API router
+- [ ] Part 3: Return 429 with Retry-After header on limit exceeded
+- [ ] Part 4: Add config for limit/window (env vars)
+```
+It stops there. You review/edit the parts, then say "go" (or similar) to start. For Part 1, it then runs implementation → code-review → test-planner/writer/executor, checks the box, and pauses before Part 2.
 
 
 ## Karpathy-Inspired Claude Code Guidelines
