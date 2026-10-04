@@ -6,8 +6,8 @@ description: >
   concrete test plan (file, test names, one-line intent each) without
   implementing it. Use BEFORE test-implementer whenever the user asks to
   "write tests" / "add test coverage" / "cover this function". Always
-  runs on Sonnet for stronger judgment on what's worth testing.
-model: sonnet
+  runs on Opus 5.5 for stronger judgment on what's worth testing.
+model: claude-opus-5-5
 tools: [Read, Grep, Glob, Bash]
 ---
 
