@@ -1,0 +1,1 @@
+{ "name": "tollasmode", "version": "0.2.0", "description": "Compact pane: model picker, activity bullets, plan steps (PanePlan), parallel subagents with live action and elapsed time, top skills and agents charts", "types": "./types/index.d.ts" }
