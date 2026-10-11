@@ -1,0 +1,21 @@
+{
+  "name": "dev-agents",
+  "description": "Dev pipeline agents (code-agent, code-review, test-planner, git-runner, os-agent, ...), shared skills (quality-bar, model-selector, commit-clean, create-worktree, csharp-style) and the /feature and /dev-pipeline orchestrators.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Mixer"
+  },
+  "repository": "https://github.com/mxrpr/Claude_code_settings",
+  "keywords": [
+    "agents",
+    "skills",
+    "dev-pipeline",
+    "code-review",
+    "orchestration"
+  ],
+  "agents": "agents/",
+  "skills": [
+    "skills/",
+    "cli-skills/"
+  ]
+}

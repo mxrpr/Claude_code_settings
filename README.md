@@ -167,3 +167,72 @@ Run it with a plan or feature description as argument. It plans first and stops 
 
 /dev-pipeline: starts the plan → implement → review → test loop. Planning subagent breaks the request into ordered parts in `plan.md` and stops for your review. Then, per part: implementation → code-review (up to 2 retries on flagged issues) → test-planner/test-writer/test-executor, pausing after each part for the go-ahead. `plan.md`'s checklist is the source of truth for where it stopped across session resets. See [plugins.md](plugins.md) for the full flow.
 
+
+## GitHub Copilot
+
+`copilot/` holds a GitHub Copilot port of the agents, skills and the `/feature` and `/dev-pipeline`
+orchestrators. Details and the differences from the Claude version: [copilot/README.md](copilot/README.md).
+
+### Copilot CLI (plugin)
+
+Install (once per machine):
+```bash
+copilot plugin install mxrpr/Claude_code_settings:copilot
+copilot plugin list                 # shows: dev-agents (v1.0.0)
+```
+
+Optional: the global guidelines are not part of the plugin; copy them yourself:
+```bash
+curl -fsSL https://raw.githubusercontent.com/mxrpr/Claude_code_settings/main/copilot/copilot-instructions.md \
+  -o ~/.copilot/copilot-instructions.md
+```
+
+Use it (run `copilot` in your project):
+
+| Goal | How |
+|---|---|
+| Run a feature from a plan | `/feature docs/plans/login-rework.md` or `/feature 142` |
+| Plan → implement → review → test loop | `/dev-pipeline <plan or description>` |
+| List skills | `/skills` |
+| List / pick an agent | `/agent` |
+| Start a session as one agent | `copilot --agent code-review` |
+| One-off prompt to an agent | `copilot --agent test-runner -p "run the tests in ./api"` |
+
+Update: rerun the install command. Remove: `copilot plugin uninstall dev-agents`.
+
+### VS Code (agent mode)
+
+VS Code does not use the CLI plugin; copy the files instead.
+
+Per repository (shared with the team):
+```bash
+git clone https://github.com/mxrpr/Claude_code_settings /tmp/ccs
+mkdir -p .github
+cp -r /tmp/ccs/copilot/{agents,skills,prompts} .github/
+cp /tmp/ccs/copilot/copilot-instructions.md .github/   # skip if you already have one; merge by hand
+```
+
+For all repositories (Linux; on macOS use `~/Library/Application Support/Code/User/prompts`):
+```bash
+mkdir -p ~/.copilot ~/.config/Code/User/prompts
+cp -r /tmp/ccs/copilot/skills ~/.copilot/
+cp /tmp/ccs/copilot/agents/*.agent.md /tmp/ccs/copilot/prompts/*.prompt.md ~/.config/Code/User/prompts/
+```
+
+Windows (PowerShell), all repositories:
+```powershell
+git clone https://github.com/mxrpr/Claude_code_settings $env:TEMP\ccs
+New-Item -ItemType Directory -Force "$HOME\.copilot", "$env:APPDATA\Code\User\prompts" | Out-Null
+Copy-Item -Recurse -Force "$env:TEMP\ccs\copilot\skills" "$HOME\.copilot\"
+Copy-Item -Force "$env:TEMP\ccs\copilot\agents\*.agent.md", "$env:TEMP\ccs\copilot\prompts\*.prompt.md" "$env:APPDATA\Code\User\prompts\"
+```
+
+Then in Copilot Chat (Agent mode): `/feature <plan.md | issue #>` or `/dev-pipeline <plan>`. Agents
+appear in the agent picker. Agent skills and subagents may need enabling in VS Code settings
+(search "skills" and "subagent").
+
+### Models
+
+Agents pin their model in the `model:` line (`Claude Opus 5.5 (copilot)`, `Claude Haiku 4.5 (copilot)`).
+If your account does not offer one, edit that line to an available model (`/model` in the CLI, the
+model picker in VS Code, shows what you have).
