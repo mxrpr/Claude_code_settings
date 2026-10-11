@@ -1,7 +1,16 @@
 # Claude_code_settings
-Contains plugins, settings used by me for Claude code
+Skills, agents, hooks and mods I use with Claude Code, plus a port of the same skills and agents
+for GitHub Copilot.
 
-## Skills
+```
+claude/     Claude Code: skills, agents, hooks, mods
+copilot/    GitHub Copilot port (custom agents, Agent Skills, prompt files, CLI plugin)
+plugins.md  third-party Claude Code plugins I use
+```
+
+## What's inside
+
+### Skills
 Located in `claude/skills/`. Each skill is a `SKILL.md` that Claude loads when its description matches the task, or when you call it by name (`/<skill>`).
 
 | Skill | Trigger | What it does |
@@ -13,7 +22,7 @@ Located in `claude/skills/`. Each skill is a `SKILL.md` that Claude loads when i
 | **create-worktree** | "create a worktree", isolated work | Creates git worktrees under `worktrees/` inside the project root, never as sibling directories. |
 | **csharp-style** | writing or editing C# | Explicit types (no `var`), XML doc comments on public/internal members, braces on all `if`/loops, explicit created types (no `new()`). |
 
-### feature — the feature orchestrator
+### `/feature` — the feature orchestrator
 
 `/feature` takes a plan someone already wrote (a Markdown file or a GitHub issue) and executes it part by part. The main thread acts only as **orchestrator**: it routes work, tracks state and talks to you. It never plans, writes production code, or runs git/shell/test commands itself; every task goes to a dedicated subagent.
 
@@ -133,47 +142,86 @@ Same loop, as the orchestrator sees it: every agent reports back to the orchestr
 └────────────────────────────────────┘
 ```
 
-## Plugins
-See [plugins.md](plugins.md) for install commands and details.
+### Agents
+Located in `claude/agents/` (Copilot: `copilot/agents/*.agent.md`). Each runs on a fixed model.
+
+| Agent | Model | What it does |
+|---|---|---|
+| **code-agent** | Opus | Implements one part of a plan to the `quality-bar` standard, with a risk analysis and self-review. |
+| **code-review** | Opus | Read-only review of a change against `quality-bar`; returns PASS/FAIL with severity-ranked findings. |
+| **planning** | Opus | Breaks a plan into small, ordered, self-contained parts in `plan.md`. |
+| **test-planner** | Opus | Plans test coverage (file, test names, intent) without writing code. |
+| **test-implementer** | Haiku | Writes tests from a test plan and runs them for the touched package. |
+| **test-writer** | Haiku | Writes test code from a test plan (no running). |
+| **test-runner** | Haiku | Runs existing test suites and reports pass/fail only, never fixes. |
+| **test-executor** | Haiku | Runs the tests relevant to a part and reports failures in detail. |
+| **git-runner** | Haiku | Executes git commands; destructive/shared-state ops (push, reset --hard, …) need explicit authorization. |
+| **os-agent** | Haiku | Executes shell/OS ops; destructive ops need explicit authorization; never starts long-running servers. |
+
+### Hooks
+- `claude/hooks/delegate-guard.sh` — `PreToolUse` hook on `Bash`. On the main thread it turns git, build/test/lint and shell commands into a permission prompt that nudges delegation to `git-runner`, `test-runner` or `os-agent` (Haiku). Bash calls inside subagents always pass. Add `NODELEGATE` to a command to skip the prompt. Needs `jq`.
+
+### Mods
+Claude Code UI mods in `claude/mods/`:
+- **tollasmode** — compact pane: model picker, activity bullets, plan steps, parallel subagents with live action and elapsed time, top skills and agents charts.
+- **featuremode** — live `/feature` status board pane (see above). Depends on `tollasmode`.
+
+### External plugins
+Third-party Claude Code plugins I use; install commands in [plugins.md](plugins.md).
 
 - **[caveman](https://github.com/juliusbrussee/caveman)** — ultra-compressed communication mode plus `cavecrew-*` subagents (investigator/builder/reviewer) for token-efficient delegation.
 - **[code security review](https://github.com/anthropics/claude-code-security-review)** — `comprehensive-review@claude-code-workflows` (architect-review, code-reviewer, security-auditor agents).
 - **code-simplifier** — Anthropic official plugin; cleans up recently modified code for clarity without changing behavior.
-- **[dev-pipeline](plugins.md#dev-pipeline)** (this repo, `dev-pipeline-plugin/`) — plan → implement → review → test loop with dedicated subagents. Install:
-  ```
-  /plugin marketplace add mxrpr/Claude_code_settings
-  /plugin install dev-pipeline@dev-pipeline-marketplace
-  ```
 
-## Hooks
-- `claude/prehooks/settings.json` — `PreToolUse` hook on `Bash`: blocks direct Bash calls from the main thread, forcing delegation to `os-agent` (general shell), `git-runner` (git ops), or `test-runner` (test commands); also blocks `os-agent` from running git/test commands directly.
+## Installation
 
-## Agents
-Located in `claude/agents/` (all run on Haiku unless noted):
+### Claude Code
 
-- **git-runner** — executes git commands; read-only ops run freely, destructive/shared-state ops (push, reset --hard, etc.) need explicit authorization.
-- **os-agent** — executes shell/OS ops; read-only ops run freely, destructive ops need explicit authorization; never starts long-running servers.
-- **test-planner** (Sonnet) — plans test coverage without writing code.
-- **test-implementer** — writes and runs tests from a plan.
-- **test-runner** — runs existing test suites and reports pass/fail only, never fixes.
-
-## Commands
-
-### Usage
+Clone the repo:
+```bash
+git clone https://github.com/mxrpr/Claude_code_settings
+cd Claude_code_settings
 ```
-/dev-pipeline <plan or feature description>
+
+Skills and agents, for all projects:
+```bash
+mkdir -p ~/.claude/skills ~/.claude/agents
+cp -r claude/skills/* ~/.claude/skills/
+cp claude/agents/*.md ~/.claude/agents/
 ```
-Run it with a plan or feature description as argument. It plans first and stops for your review — nothing gets implemented until you tell it to continue. After that it works through the plan.md checklist one part at a time (implement → review → test), pausing between parts for you to say go-ahead.
+For one project only, copy them into `<project>/.claude/skills/` and `<project>/.claude/agents/` instead.
+Run `/feature <plan.md | issue #>` in Claude Code to start the orchestrator.
 
-/dev-pipeline: starts the plan → implement → review → test loop. Planning subagent breaks the request into ordered parts in `plan.md` and stops for your review. Then, per part: implementation → code-review (up to 2 retries on flagged issues) → test-planner/test-writer/test-executor, pausing after each part for the go-ahead. `plan.md`'s checklist is the source of truth for where it stopped across session resets. See [plugins.md](plugins.md) for the full flow.
+Hook (optional, needs `jq`):
+```bash
+mkdir -p ~/.claude/hooks
+cp claude/hooks/delegate-guard.sh ~/.claude/hooks/ && chmod +x ~/.claude/hooks/delegate-guard.sh
+```
+then add to `~/.claude/settings.json`:
+```json
+"hooks": {
+  "PreToolUse": [
+    { "matcher": "Bash",
+      "hooks": [ { "type": "command", "command": "~/.claude/hooks/delegate-guard.sh" } ] }
+  ]
+}
+```
 
+Mods (optional; `featuremode` needs `tollasmode`):
+```bash
+mkdir -p ~/.claude/mods
+cp -r claude/mods/tollasmode claude/mods/featuremode ~/.claude/mods/
+```
+Restart Claude Code to load them; `/featuremode` shows/hides the feature pane.
 
-## GitHub Copilot
+External plugins: see [plugins.md](plugins.md).
 
-`copilot/` holds a GitHub Copilot port of the agents, skills and the `/feature` and `/dev-pipeline`
+### GitHub Copilot
+
+`copilot/` holds the Copilot port of the agents, skills and the `/feature` and `/dev-pipeline`
 orchestrators. Details and the differences from the Claude version: [copilot/README.md](copilot/README.md).
 
-### Copilot CLI (plugin)
+#### Copilot CLI (plugin)
 
 Install (once per machine):
 ```bash
@@ -200,7 +248,7 @@ Use it (run `copilot` in your project):
 
 Update: rerun the install command. Remove: `copilot plugin uninstall dev-agents`.
 
-### VS Code (agent mode)
+#### VS Code (agent mode)
 
 VS Code does not use the CLI plugin; copy the files instead.
 
@@ -231,7 +279,7 @@ Then in Copilot Chat (Agent mode): `/feature <plan.md | issue #>` or `/dev-pipel
 appear in the agent picker. Agent skills and subagents may need enabling in VS Code settings
 (search "skills" and "subagent").
 
-### Models
+#### Models
 
 Agents pin their model in the `model:` line (`Claude Opus 5.5 (copilot)`, `Claude Haiku 4.5 (copilot)`).
 If your account does not offer one, edit that line to an available model (`/model` in the CLI, the
