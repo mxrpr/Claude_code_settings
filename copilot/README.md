@@ -19,7 +19,7 @@ and pipelines, usable from VS Code agent mode and Copilot CLI.
 ### Copilot CLI plugin (easiest)
 
 ```bash
-copilot plugin install mxrpr/Claude_code_settings:copilot
+copilot plugin install mxrpr/tollas-agent-kit:copilot
 ```
 
 Installs the agents, all skills and the `/feature` and `/dev-pipeline` skills. Update by running the

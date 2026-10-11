@@ -23,7 +23,7 @@ The rule it enforces that I appreciate most: never change behaviour, only how be
 ## dev-pipeline
 Source: this repo — `dev-pipeline-plugin/`
 
-`/plugin marketplace add mxrpr/Claude_code_settings`
+`/plugin marketplace add mxrpr/tollas-agent-kit`
 `/plugin install dev-pipeline@dev-pipeline-marketplace`
 
 Runs a plan → implement → review → test loop, one part of `plan.md` at a time, instead of one big agent doing everything in a single unstructured pass. Each stage is a dedicated subagent so each one stays narrowly scoped and the context of one stage doesn't pollute another.

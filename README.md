@@ -1,4 +1,4 @@
-# Claude_code_settings
+# tollas-agent-kit
 Skills, agents, hooks and mods I use with Claude Code, plus a port of the same skills and agents
 for GitHub Copilot.
 
@@ -179,8 +179,8 @@ Third-party Claude Code plugins I use; install commands in [plugins.md](plugins.
 
 Clone the repo:
 ```bash
-git clone https://github.com/mxrpr/Claude_code_settings
-cd Claude_code_settings
+git clone https://github.com/mxrpr/tollas-agent-kit
+cd tollas-agent-kit
 ```
 
 Skills and agents, for all projects:
@@ -225,13 +225,13 @@ orchestrators. Details and the differences from the Claude version: [copilot/REA
 
 Install (once per machine):
 ```bash
-copilot plugin install mxrpr/Claude_code_settings:copilot
+copilot plugin install mxrpr/tollas-agent-kit:copilot
 copilot plugin list                 # shows: dev-agents (v1.0.0)
 ```
 
 Optional: the global guidelines are not part of the plugin; copy them yourself:
 ```bash
-curl -fsSL https://raw.githubusercontent.com/mxrpr/Claude_code_settings/main/copilot/copilot-instructions.md \
+curl -fsSL https://raw.githubusercontent.com/mxrpr/tollas-agent-kit/main/copilot/copilot-instructions.md \
   -o ~/.copilot/copilot-instructions.md
 ```
 
@@ -254,7 +254,7 @@ VS Code does not use the CLI plugin; copy the files instead.
 
 Per repository (shared with the team):
 ```bash
-git clone https://github.com/mxrpr/Claude_code_settings /tmp/ccs
+git clone https://github.com/mxrpr/tollas-agent-kit /tmp/ccs
 mkdir -p .github
 cp -r /tmp/ccs/copilot/{agents,skills,prompts} .github/
 cp /tmp/ccs/copilot/copilot-instructions.md .github/   # skip if you already have one; merge by hand
@@ -269,7 +269,7 @@ cp /tmp/ccs/copilot/agents/*.agent.md /tmp/ccs/copilot/prompts/*.prompt.md ~/.co
 
 Windows (PowerShell), all repositories:
 ```powershell
-git clone https://github.com/mxrpr/Claude_code_settings $env:TEMP\ccs
+git clone https://github.com/mxrpr/tollas-agent-kit $env:TEMP\ccs
 New-Item -ItemType Directory -Force "$HOME\.copilot", "$env:APPDATA\Code\User\prompts" | Out-Null
 Copy-Item -Recurse -Force "$env:TEMP\ccs\copilot\skills" "$HOME\.copilot\"
 Copy-Item -Force "$env:TEMP\ccs\copilot\agents\*.agent.md", "$env:TEMP\ccs\copilot\prompts\*.prompt.md" "$env:APPDATA\Code\User\prompts\"

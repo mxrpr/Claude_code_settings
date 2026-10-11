@@ -12,11 +12,11 @@
 #   --force          overwrite an existing copilot-instructions.md
 #
 # Run from a clone, or straight from GitHub:
-#   curl -fsSL https://raw.githubusercontent.com/mxrpr/Claude_code_settings/main/copilot/install.sh | bash
-#   curl -fsSL https://raw.githubusercontent.com/mxrpr/Claude_code_settings/main/copilot/install.sh | bash -s -- --project
+#   curl -fsSL https://raw.githubusercontent.com/mxrpr/tollas-agent-kit/main/copilot/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/mxrpr/tollas-agent-kit/main/copilot/install.sh | bash -s -- --project
 set -euo pipefail
 
-REPO="${COPILOT_SETTINGS_REPO:-mxrpr/Claude_code_settings}"
+REPO="${COPILOT_SETTINGS_REPO:-mxrpr/tollas-agent-kit}"
 REF="main"
 MODE="global"
 PROJECT_DIR="$PWD"
