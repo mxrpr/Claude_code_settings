@@ -1,0 +1,1 @@
+{ "name": "featuremode", "version": "0.1.0", "description": "Pane showing the /feature skill's status board (.claude/feature/status.md) and top skills from tollasmode", "types": "./types/index.d.ts", "dependencies": ["tollasmode"] }
