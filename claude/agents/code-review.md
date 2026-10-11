@@ -2,7 +2,7 @@
 name: code-review
 description: Reviews an implementation change for correctness, security, performance, quality, and tests against the shared quality bar. Use for the review stage of the dev pipeline. Read-only.
 tools: Read, Grep, Glob, Bash(git diff:*)
-model: claude-sonnet-5-5
+model: claude-opus-5-5
 skills:
   - quality-bar
 ---

@@ -1,8 +1,8 @@
 ---
 name: model-selector
 description: >
-  Pick the right Claude model (Haiku / Sonnet / Opus / Fable) for a task by its complexity.
-  Use when delegating work to a subagent (choose the Agent tool `model`), when planning
+  Pick the right subagent type and Claude model (Haiku / Sonnet / Opus / Fable) for a task.
+  Use when delegating work to a subagent (choose the Agent tool `subagent_type` and `model`), when planning
   multi-step work that can be split across cheap and strong models, or when the user asks
   "which model should I use", "pick a model", "use a cheaper model", "is this worth Opus".
   Also use to tell the user when the main-thread model is a poor fit and they should `/model`.
@@ -24,11 +24,40 @@ for judgment. Wrong in either direction costs: too weak → bad output and rewor
 - **Cannot:** switch the model of the current conversation. `/model` is a user command;
   never claim to have switched it.
 - Agents with a fixed model in their frontmatter (`git-runner`, `os-agent`, `test-runner`,
-  `test-implementer`, `test-writer`, `test-executor` → Haiku; `planing`, `code-agent`,
+  `test-implementer`, `test-writer`, `test-executor` → Haiku; `planning`, `code-agent`,
   `code-review`, `test-planner` → Opus) already choose for themselves. Prefer those agents
-  for their job instead of overriding.
+  for their job instead of overriding. Override a fixed-model agent only to escalate
+  (e.g. pass `model: "fable"` to `code-agent` after an Opus attempt failed) — never to
+  downgrade.
 - **Production code is written and reviewed on Opus** (user rule). Never drop
   implementation or code review of production code below Opus, even when the plan is precise.
+  Exception: purely mechanical edits that cannot change behaviour (rename, typo, format)
+  may use Haiku.
+
+## Step 1 (required): pick the agent type
+
+Before choosing a model, pick `subagent_type` from this table. First matching row wins.
+Never omit `subagent_type`: omitting it silently means `general-purpose`.
+
+| Task | `subagent_type` | Model |
+|---|---|---|
+| Locate code, map a directory, "where is X" | `Explore` (`model: "haiku"`) or `caveman:cavecrew-investigator` | Haiku |
+| Any git command (status, log, diff, commit, branch) | `git-runner` | fixed Haiku |
+| Shell / filesystem / install / lint / build / HTTP | `os-agent` | fixed Haiku |
+| Run existing tests, report pass/fail | `test-runner` | fixed Haiku |
+| Decide what tests to write | `test-planner` | fixed Opus |
+| Write tests from a plan | `test-implementer` | fixed Haiku |
+| Implement one part of an existing plan | `code-agent` | fixed Opus |
+| Review a diff | `code-review` or `caveman:cavecrew-reviewer` | Opus |
+| Design / architecture plan | `Plan` (`model: "opus"`) | Opus |
+| Nothing above fits | `general-purpose`, **always with explicit `model`** | per rules below |
+
+`general-purpose` is the last resort. Using it requires a one-line reason why no row fits.
+
+## Step 2: pick the model
+
+Only needed for agents without a fixed model (`Explore`, `Plan`, `general-purpose`, the
+cavecrew agents) or to escalate a fixed-model agent.
 
 ## Models
 
@@ -45,7 +74,9 @@ Evaluate in order. First match wins.
 
 **→ Haiku** when the task is fully specified and needs no judgment:
 - Run commands, tests, builds, git operations; report results.
-- Rename, typo, format, comment removal, mechanical find/replace.
+- Rename, typo, format, comment removal, mechanical find/replace — allowed in
+  production code ONLY if behaviour cannot change (no logic, signature, or
+  control-flow edits). Anything else in production code → Opus.
 - Locate code ("where is X defined", "list callers of Y").
 - Write tests from an existing test plan.
 - Summarize or extract from a given file or log.
@@ -57,6 +88,7 @@ Evaluate in order. First match wins.
 - Novel algorithm or research-grade problem with no known pattern.
 
 **→ Opus** when ANY:
+- Write or modify production code (any size) — user rule.
 - Design / architecture / API shape decisions.
 - Root-cause analysis of a non-obvious bug ("why does…", intermittent, cross-module).
 - Refactor or feature spanning 3+ files or several layers.
@@ -64,8 +96,8 @@ Evaluate in order. First match wins.
 - Code review or security review, test planning (what is worth covering).
 - Planning work that other agents will execute.
 
-**→ Sonnet** (default): everything else — docs, explanations of existing code,
-non-production scripts, drafting text.
+**→ Sonnet** (default): everything else that is NOT production code — docs,
+explanations of existing code, throwaway/non-production scripts, drafting text.
 
 ## Adjusters
 
@@ -80,8 +112,8 @@ non-production scripts, drafting text.
 
 ## Delegating
 
-When spawning the subagent, state the choice and the reason in one line, then pass
-`model` explicitly:
+When spawning the subagent, state the agent type, the model and the reason in one line, then
+pass `subagent_type` always, and `model` whenever the agent has no fixed model:
 
 ```
 Agent(description: "Locate auth callers", subagent_type: "Explore", model: "haiku", prompt: ...)
